@@ -1,42 +1,432 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Links</title>
-        <link href="/reset.css" rel="stylesheet">
-        <link href="/style.css" rel="stylesheet">
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MAISON SB — Atelier de Parfum Digital</title>
+<link rel="stylesheet" href="style.css">
 
-        <script defer src="/script.js"></script>
+</head>
+<body>
 
-    </head>
+<!-- ═══════════════════════ LANDING -->
+<div class="screen active" id="screen-landing">
+  <div class="brand-mark"><span class="fr"><span class="fr-text">Établi</span><span class="fr-en">Founded</span></span> · 2026</div>
+  <div class="main-logo">Maison SB</div>
+  <div class="sub-logo"><span class="fr"><span class="fr-text">Atelier de Parfum Digital</span><span class="fr-en">Digital Fragrance Studio</span></span></div>
+  <div class="hairline"></div>
+  <div class="tagline">"Compose your invisible signature."</div>
+  <button class="btn-primary" onclick="goTo('compose')"><span class="fr"><span class="fr-text">Composer un Parfum</span><span class="fr-en">Create a Fragrance</span></span></button>
+</div>
 
+<!-- ═══════════════════════ COMPOSE -->
+<div class="screen" id="screen-compose">
+  <div class="compose-inner">
+  <div class="compose-header">
+    <div class="compose-title"><span class="fr"><span class="fr-text">La Composition</span><span class="fr-en">The Composition</span></span></div>
+    <div class="compose-sub"><span class="fr"><span class="fr-text">Quelques touches pour guider l'atelier…</span><span class="fr-en">A few touches to guide the studio…</span></span></div>
+  </div>
 
-    <body>
-        <header>
-            <h1>
-                <span class="bracket">[ </span>Redacted<span class="bracket"> ]</span>
-            </h1>
-        </header>
+  <div class="field-group">
+    <label class="field-label"><span class="fr"><span class="fr-text">Humeur</span><span class="fr-en">Mood</span></span></label>
+    <div class="slider-wrap">
+      <div class="slider-labels">
+        <span class="slider-label"><span class="fr"><span class="fr-text">Tendre</span><span class="fr-en">Tender</span></span></span>
+        <span class="slider-label"><span class="fr"><span class="fr-text">Audacieux</span><span class="fr-en">Daring</span></span></span>
+      </div>
+      <input type="range" id="mood" min="0" max="100" value="50">
+    </div>
+  </div>
 
-        <main>
-            <h2>
-                Text to Novel
-            </h2>
-            <!-- <section class="dollie" id="cat">
-                <img src="./media/cat.png" alt="">
-            </section>
-            <section class="dollie" id="frame">
-                <img src="./media/frame.png" alt="">
-            </section> -->
-        </main>
+  <div class="field-group">
+    <label class="field-label"><span class="fr"><span class="fr-text">Moment</span><span class="fr-en">Time of Day</span></span></label>
+    <div class="options-row">
+      <button class="option-btn selected" data-group="time" data-val="Jour"><span class="fr"><span class="fr-text">Jour</span><span class="fr-en">Day</span></span></button>
+      <button class="option-btn" data-group="time" data-val="Soir"><span class="fr"><span class="fr-text">Soir</span><span class="fr-en">Evening</span></span></button>
+      <button class="option-btn" data-group="time" data-val="Nuit"><span class="fr"><span class="fr-text">Nuit</span><span class="fr-en">Night</span></span></button>
+    </div>
+  </div>
 
-    </body>
+  <div class="field-group">
+    <label class="field-label">Texture</label>
+    <div class="options-row">
+      <button class="option-btn selected" data-group="texture" data-val="Frais"><span class="fr"><span class="fr-text">Frais</span><span class="fr-en">Fresh</span></span></button>
+      <button class="option-btn" data-group="texture" data-val="Boisé"><span class="fr"><span class="fr-text">Boisé</span><span class="fr-en">Woody</span></span></button>
+      <button class="option-btn" data-group="texture" data-val="Épicé"><span class="fr"><span class="fr-text">Épicé</span><span class="fr-en">Spiced</span></span></button>
+      <button class="option-btn" data-group="texture" data-val="Ambré"><span class="fr"><span class="fr-text">Ambré</span><span class="fr-en">Amber</span></span></button>
+    </div>
+  </div>
 
+  <div class="field-group">
+    <label class="field-label"><span class="fr"><span class="fr-text">Nom (optionnel)</span><span class="fr-en">Name (optional)</span></span></label>
+    <input type="text" class="text-input" id="fragrance-name-input" placeholder="Le titre de votre parfum…" maxlength="40">
+  </div>
 
+  <div class="compose-actions">
+    <button class="btn-ghost" onclick="goTo('landing')">← <span class="fr"><span class="fr-text">Retour</span><span class="fr-en">Back</span></span></button>
+    <button class="btn-primary" onclick="startGeneration()"><span class="fr"><span class="fr-text">Macérer</span><span class="fr-en">Infuse</span></span> →</button>
+  </div>
+  </div>
+</div>
 
+<!-- ═══════════════════════ GENERATING -->
+<div class="screen" id="screen-generating">
+  <svg class="bottle-silhouette" viewBox="0 0 120 230" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <!-- Drop shadow filter -->
+      <filter id="genShadow" x="-30%" y="-10%" width="160%" height="130%">
+        <feDropShadow dx="0" dy="12" stdDeviation="10" flood-color="rgba(28,24,20,0.18)"/>
+      </filter>
 
+      <!-- Body clip -->
+      <clipPath id="bottleClip">
+        <rect x="14" y="62" width="92" height="154" rx="10" ry="10"/>
+      </clipPath>
 
+      <!-- Glass: multi-stop horizontal gradient for depth -->
+      <linearGradient id="glassGrad" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%"    stop-color="#a8998a" stop-opacity="0.25"/>
+        <stop offset="8%"    stop-color="#ffffff" stop-opacity="0.55"/>
+        <stop offset="16%"   stop-color="#f0e8dc" stop-opacity="0.10"/>
+        <stop offset="50%"   stop-color="#e8dfd4" stop-opacity="0.04"/>
+        <stop offset="82%"   stop-color="#c8bfb0" stop-opacity="0.10"/>
+        <stop offset="93%"   stop-color="#ffffff" stop-opacity="0.22"/>
+        <stop offset="100%"  stop-color="#8a7d70" stop-opacity="0.28"/>
+      </linearGradient>
 
+      <!-- Glass tint: very faint warm vertical -->
+      <linearGradient id="glassTint" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%"   stop-color="#f8f2ea" stop-opacity="0.06"/>
+        <stop offset="100%" stop-color="#c8b89a" stop-opacity="0.12"/>
+      </linearGradient>
 
+      <!-- Neck gradient -->
+      <linearGradient id="neckGrad" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%"   stop-color="#a0907e" stop-opacity="0.3"/>
+        <stop offset="30%"  stop-color="#ffffff" stop-opacity="0.5"/>
+        <stop offset="100%" stop-color="#8a7a68" stop-opacity="0.25"/>
+      </linearGradient>
+
+      <!-- Cap gradient: matte black with subtle sheen -->
+      <linearGradient id="capGrad" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%"   stop-color="#0e0c0a"/>
+        <stop offset="30%"  stop-color="#2a2520"/>
+        <stop offset="70%"  stop-color="#1a1612"/>
+        <stop offset="100%" stop-color="#080604"/>
+      </linearGradient>
+      <linearGradient id="capTop" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%"   stop-color="#3a3028" stop-opacity="1"/>
+        <stop offset="100%" stop-color="#0a0806" stop-opacity="1"/>
+      </linearGradient>
+
+      <!-- Cap rim chrome line -->
+      <linearGradient id="rimGrad" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%"   stop-color="#606060" stop-opacity="0.4"/>
+        <stop offset="30%"  stop-color="#d0c8be" stop-opacity="0.9"/>
+        <stop offset="70%"  stop-color="#b0a898" stop-opacity="0.6"/>
+        <stop offset="100%" stop-color="#505050" stop-opacity="0.3"/>
+      </linearGradient>
+    </defs>
+
+    <!-- ── SHADOW ── -->
+    <ellipse cx="60" cy="225" rx="36" ry="5" fill="rgba(28,24,20,0.12)"/>
+
+    <!-- ── BODY LIQUID (animated fill) ── -->
+    <g clip-path="url(#bottleClip)">
+      <!-- Liquid bg -->
+      <rect id="gen-liquid" x="14" y="216" width="92" height="0"
+            fill="hsl(214,38%,68%)" opacity="0.52" class="bottle-liquid"/>
+      <!-- Liquid shimmer stripe -->
+      <rect id="gen-liquid-shine" x="24" y="216" width="8" height="0"
+            fill="rgba(255,255,255,0.18)" class="bottle-liquid"/>
+    </g>
+
+    <!-- ── BODY BASE (glass fill) ── -->
+    <rect x="14" y="62" width="92" height="154" rx="10" ry="10"
+          fill="url(#glassTint)"/>
+
+    <!-- ── BODY GLASS SHEEN ── -->
+    <rect x="14" y="62" width="92" height="154" rx="10" ry="10"
+          fill="url(#glassGrad)"/>
+
+    <!-- ── BODY OUTLINE ── -->
+    <rect x="14" y="62" width="92" height="154" rx="10" ry="10"
+          stroke="#1c1814" stroke-width="0.7" fill="none" filter="url(#genShadow)"/>
+
+    <!-- ── LABEL PANEL ── -->
+    <rect x="22" y="124" width="76" height="60" rx="1"
+          fill="rgba(248,243,236,0.82)" stroke="rgba(140,128,115,0.25)" stroke-width="0.5"/>
+    <!-- Label inner border hairline -->
+    <rect x="26" y="128" width="68" height="52" rx="0.5"
+          fill="none" stroke="rgba(184,151,106,0.35)" stroke-width="0.4"/>
+
+    <!-- ── NECK ── -->
+    <rect x="42" y="44" width="36" height="20" rx="3" ry="3"
+          fill="url(#neckGrad)" stroke="#1c1814" stroke-width="0.6"/>
+    <!-- Neck inner shadow line -->
+    <line x1="43" y1="44" x2="43" y2="64" stroke="rgba(0,0,0,0.12)" stroke-width="1.5"/>
+    <line x1="77" y1="44" x2="77" y2="64" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+
+    <!-- ── CAP ── -->
+    <rect x="34" y="14" width="52" height="32" rx="4" ry="4"
+          fill="url(#capGrad)"/>
+    <!-- Cap top face (slightly lighter) -->
+    <rect x="34" y="14" width="52" height="10" rx="4" ry="4"
+          fill="url(#capTop)"/>
+    <!-- Cap subtle side bevel -->
+    <rect x="34" y="14" width="3" height="32" rx="1"
+          fill="rgba(255,255,255,0.04)"/>
+    <!-- Cap bottom rim chrome -->
+    <rect x="33" y="43" width="54" height="2.5" rx="0.5"
+          fill="url(#rimGrad)"/>
+
+    <!-- ── REFLECTIONS on body ── -->
+    <!-- Primary left highlight -->
+    <rect x="20" y="68" width="6" height="140" rx="3"
+          fill="rgba(255,255,255,0.28)"/>
+    <!-- Secondary soft left highlight -->
+    <rect x="28" y="72" width="2" height="120" rx="1"
+          fill="rgba(255,255,255,0.10)"/>
+    <!-- Right edge glint -->
+    <rect x="98" y="74" width="4" height="100" rx="2"
+          fill="rgba(255,255,255,0.12)"/>
+    <!-- Top inner catch light arc -->
+    <ellipse cx="60" cy="70" rx="28" ry="4"
+             fill="rgba(255,255,255,0.18)"/>
+  </svg>
+
+  <div class="gen-text shimmer" id="gen-text">Infusing top notes…</div>
+  <div class="gen-steps" id="gen-steps">— <span class="fr"><span class="fr-text">atelier de parfum</span><span class="fr-en">fragrance studio</span></span> —</div>
+</div>
+
+<!-- ═══════════════════════ REVEAL -->
+<div class="screen" id="screen-reveal">
+  <div class="reveal-bottle-col">
+    <svg class="reveal-bottle" width="180" height="345" viewBox="0 0 120 230" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <!-- Drop shadow -->
+        <filter id="revealShadow" x="-30%" y="-10%" width="160%" height="130%">
+          <feDropShadow dx="0" dy="14" stdDeviation="12" flood-color="rgba(28,24,20,0.20)"/>
+        </filter>
+
+        <!-- Body clip -->
+        <clipPath id="bottleClipReveal">
+          <rect x="14" y="62" width="92" height="154" rx="10" ry="10"/>
+        </clipPath>
+
+        <!-- Glass: rich multi-stop horizontal -->
+        <linearGradient id="glassGradReveal" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%"    stop-color="#a8998a" stop-opacity="0.28"/>
+          <stop offset="8%"    stop-color="#ffffff" stop-opacity="0.58"/>
+          <stop offset="16%"   stop-color="#f0e8dc" stop-opacity="0.08"/>
+          <stop offset="50%"   stop-color="#e8dfd4" stop-opacity="0.03"/>
+          <stop offset="82%"   stop-color="#c8bfb0" stop-opacity="0.09"/>
+          <stop offset="93%"   stop-color="#ffffff" stop-opacity="0.25"/>
+          <stop offset="100%"  stop-color="#8a7d70" stop-opacity="0.30"/>
+        </linearGradient>
+
+        <!-- Glass warm tint -->
+        <linearGradient id="glassTintReveal" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stop-color="#f8f2ea" stop-opacity="0.07"/>
+          <stop offset="100%" stop-color="#c8b89a" stop-opacity="0.14"/>
+        </linearGradient>
+
+        <!-- Liquid gradient -->
+        <linearGradient id="liquidGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   id="liquidTop" stop-color="hsl(214,38%,72%)" stop-opacity="0.28"/>
+          <stop offset="100%" id="liquidBot" stop-color="hsl(214,44%,48%)" stop-opacity="0.60"/>
+        </linearGradient>
+        <!-- Liquid side shine -->
+        <linearGradient id="liquidShine" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%"  stop-color="rgba(255,255,255,0.22)"/>
+          <stop offset="30%" stop-color="rgba(255,255,255,0)"/>
+        </linearGradient>
+
+        <!-- Neck -->
+        <linearGradient id="neckGradReveal" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%"   stop-color="#a0907e" stop-opacity="0.32"/>
+          <stop offset="30%"  stop-color="#ffffff" stop-opacity="0.52"/>
+          <stop offset="100%" stop-color="#8a7a68" stop-opacity="0.26"/>
+        </linearGradient>
+
+        <!-- Cap -->
+        <linearGradient id="capGradReveal" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%"   stop-color="#0e0c0a"/>
+          <stop offset="28%"  stop-color="#2e2824"/>
+          <stop offset="68%"  stop-color="#1c1814"/>
+          <stop offset="100%" stop-color="#060402"/>
+        </linearGradient>
+        <linearGradient id="capTopReveal" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stop-color="#3c3028"/>
+          <stop offset="100%" stop-color="#0a0806"/>
+        </linearGradient>
+
+        <!-- Chrome rim -->
+        <linearGradient id="rimGradReveal" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%"   stop-color="#505050" stop-opacity="0.35"/>
+          <stop offset="28%"  stop-color="#d8d0c4" stop-opacity="0.95"/>
+          <stop offset="72%"  stop-color="#b0a898" stop-opacity="0.65"/>
+          <stop offset="100%" stop-color="#484840" stop-opacity="0.28"/>
+        </linearGradient>
+      </defs>
+
+      <!-- ── FLOOR SHADOW ── -->
+      <ellipse cx="60" cy="225" rx="38" ry="5.5" fill="rgba(28,24,20,0.13)"/>
+
+      <!-- ── LIQUID ── -->
+      <g clip-path="url(#bottleClipReveal)">
+        <rect id="reveal-liquid" x="14" y="96" width="92" height="120" fill="url(#liquidGrad)"/>
+        <!-- Liquid meniscus highlight -->
+        <ellipse id="reveal-meniscus" cx="60" cy="97" rx="44" ry="3"
+                 fill="rgba(255,255,255,0.22)"/>
+        <!-- Liquid left shine -->
+        <rect x="14" y="96" width="12" height="120" fill="url(#liquidShine)"/>
+      </g>
+
+      <!-- ── BODY TINT + GLASS SHEEN ── -->
+      <rect x="14" y="62" width="92" height="154" rx="10" ry="10"
+            fill="url(#glassTintReveal)"/>
+      <rect x="14" y="62" width="92" height="154" rx="10" ry="10"
+            fill="url(#glassGradReveal)"/>
+      <!-- Body outline with shadow -->
+      <rect x="14" y="62" width="92" height="154" rx="10" ry="10"
+            stroke="#1c1814" stroke-width="0.65" fill="none" filter="url(#revealShadow)"/>
+
+      <!-- ── LABEL PANEL ── -->
+      <rect x="21" y="118" width="78" height="68" rx="1"
+            fill="rgba(248,243,236,0.85)" stroke="rgba(140,128,115,0.22)" stroke-width="0.5"/>
+      <!-- Label inner hairline border -->
+      <rect x="25" y="122" width="70" height="60" rx="0.5"
+            fill="none" stroke="rgba(184,151,106,0.38)" stroke-width="0.4"/>
+
+      <!-- Label content -->
+      <text x="60" y="136" text-anchor="middle"
+            font-family="'NanumMyeongjo', 'Cormorant Garamond', serif" font-size="5.5"
+            letter-spacing="2.2" fill="#1c1814" font-weight="300">MAISON SB</text>
+      <line x1="30" y1="141" x2="90" y2="141" stroke="#b8976a" stroke-width="0.45"/>
+      <text x="60" y="152" text-anchor="middle"
+            font-family="'NanumMyeongjo', 'Cormorant Garamond', serif" font-size="4"
+            letter-spacing="1" fill="#5a5248" font-style="italic"
+            id="bottle-name-label">EAU DE PARFUM</text>
+      <line x1="35" y1="158" x2="85" y2="158" stroke="rgba(140,128,115,0.2)" stroke-width="0.3"/>
+      <text x="60" y="167" text-anchor="middle"
+            font-family="'NanumMyeongjo', 'Cormorant Garamond', serif" font-size="3.4"
+            letter-spacing="2" fill="#9a9088">PARIS · LONDON</text>
+      <text x="60" y="177" text-anchor="middle"
+            font-family="'NanumMyeongjo', 'Cormorant Garamond', serif" font-size="3.2"
+            letter-spacing="0.8" fill="rgba(130,120,110,0.6)" font-style="italic">50 ml</text>
+
+      <!-- ── NECK ── -->
+      <rect x="42" y="44" width="36" height="20" rx="3" ry="3"
+            fill="url(#neckGradReveal)" stroke="#1c1814" stroke-width="0.6"/>
+      <line x1="43" y1="44" x2="43" y2="64" stroke="rgba(0,0,0,0.10)" stroke-width="1.5"/>
+      <line x1="77" y1="44" x2="77" y2="64" stroke="rgba(255,255,255,0.16)" stroke-width="1"/>
+
+      <!-- ── CAP ── -->
+      <rect x="34" y="14" width="52" height="32" rx="4" ry="4"
+            fill="url(#capGradReveal)"/>
+      <rect x="34" y="14" width="52" height="11" rx="4" ry="4"
+            fill="url(#capTopReveal)"/>
+      <!-- Cap bevel left -->
+      <rect x="34" y="14" width="3" height="32" rx="1"
+            fill="rgba(255,255,255,0.04)"/>
+      <!-- Cap rim chrome -->
+      <rect x="33" y="43" width="54" height="2.5" rx="0.5"
+            fill="url(#rimGradReveal)"/>
+
+      <!-- ── BODY REFLECTIONS ── -->
+      <!-- Primary left highlight -->
+      <rect x="20" y="68" width="7" height="140" rx="3.5"
+            fill="rgba(255,255,255,0.30)"/>
+      <!-- Soft secondary left -->
+      <rect x="29" y="74" width="2.5" height="118" rx="1.25"
+            fill="rgba(255,255,255,0.11)"/>
+      <!-- Right edge glint -->
+      <rect x="97" y="76" width="5" height="96" rx="2.5"
+            fill="rgba(255,255,255,0.13)"/>
+      <!-- Top catch-light -->
+      <ellipse cx="60" cy="70" rx="30" ry="4.5"
+               fill="rgba(255,255,255,0.20)"/>
+      <!-- Bottom inner glow -->
+      <ellipse cx="60" cy="210" rx="36" ry="4"
+               fill="rgba(255,255,255,0.06)"/>
+    </svg>
+
+    <div class="reveal-actions">
+      <button class="btn-download" onclick="downloadCard()">↓ <span class="fr"><span class="fr-text">Archiver</span><span class="fr-en">Archive</span></span></button>
+      <button class="btn-again" onclick="goTo('landing')"><span class="fr"><span class="fr-text">Nouvelle composition</span><span class="fr-en">New fragrance</span></span> →</button>
+      <div class="cellar-count" id="cellar-count"></div>
+    </div>
+  </div>
+
+  <div id="fragrance-card" class="reveal-card">
+    <!-- Seal -->
+    <svg class="seal" width="60" height="60" viewBox="0 0 60 60">
+      <circle cx="30" cy="30" r="28" fill="none" stroke="#1c1814" stroke-width="0.8"/>
+      <circle cx="30" cy="30" r="23" fill="none" stroke="#1c1814" stroke-width="0.4"/>
+      <text x="30" y="28" text-anchor="middle" font-family="'Cormorant Garamond'" font-size="6" letter-spacing="2" fill="#1c1814">MAISON</text>
+      <text x="30" y="37" text-anchor="middle" font-family="'Cormorant Garamond'" font-size="8" letter-spacing="1" fill="#1c1814">SB</text>
+    </svg>
+
+    <div class="card-brand">
+      <div class="card-brand-name">Maison SB</div>
+      <div class="card-brand-sub"><span class="fr"><span class="fr-text">Atelier de Parfum Digital</span><span class="fr-en">Digital Fragrance Studio</span></span></div>
+    </div>
+
+    <div class="card-divider"></div>
+
+    <div class="card-fragrance-name" id="card-name">—</div>
+    <div class="card-concentration" id="card-concentration">Eau de Parfum</div>
+    <div class="card-family" id="card-family">Woody Floral Musk</div>
+
+    <div class="card-divider"></div>
+
+    <div class="pyramid-section">
+      <div class="pyramid-row">
+        <div class="pyramid-label"><span class="fr"><span class="fr-text">Notes de Tête</span><span class="fr-en">Top Notes</span></span></div>
+        <div class="pyramid-notes" id="card-top">—</div>
+      </div>
+      <div class="pyramid-row">
+        <div class="pyramid-label"><span class="fr"><span class="fr-text">Notes de Cœur</span><span class="fr-en">Heart Notes</span></span></div>
+        <div class="pyramid-notes" id="card-heart">—</div>
+      </div>
+      <div class="pyramid-row">
+        <div class="pyramid-label"><span class="fr"><span class="fr-text">Notes de Fond</span><span class="fr-en">Base Notes</span></span></div>
+        <div class="pyramid-notes" id="card-base">—</div>
+      </div>
+    </div>
+
+    <div class="card-divider"></div>
+
+    <div class="character-row">
+      <div class="char-item">
+        <div class="char-key"><span class="fr"><span class="fr-text">Humeur</span><span class="fr-en">Mood</span></span></div>
+        <div class="char-val" id="char-mood">—</div>
+      </div>
+      <div class="char-item">
+        <div class="char-key"><span class="fr"><span class="fr-text">Longévité</span><span class="fr-en">Longevity</span></span></div>
+        <div class="char-val" id="char-longevity">—</div>
+      </div>
+      <div class="char-item">
+        <div class="char-key">Projection</div>
+        <div class="char-val" id="char-projection">—</div>
+      </div>
+      <div class="char-item">
+        <div class="char-key"><span class="fr"><span class="fr-text">Intensité</span><span class="fr-en">Intensity</span></span></div>
+        <div class="char-val" id="char-intensity">—</div>
+      </div>
+    </div>
+
+    <div class="card-footer">
+      <div>
+        <div class="batch-code" id="card-batch">—</div>
+        <div class="batch-code" style="margin-top:4px; color:#b8bfb0" id="card-edition">—</div>
+      </div>
+      <div class="edition-info"><span class="fr"><span class="fr-text">Paris · 2026</span><span class="fr-en">Paris · 2026</span></span></div>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
 </html>
