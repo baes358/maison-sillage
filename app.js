@@ -247,7 +247,7 @@ function downloadCard() {
   // --- HEADER: Maison SB ---
   ctx.textAlign = 'center';
   ctx.fillStyle = textScript;
-  ctx.font = '400 52px "Great Vibes", cursive';
+  ctx.font = '400 52px "Maison", cursive';
   ctx.fillText('Maison Sillage', W / 2, y);
   y += 32;
 
@@ -268,13 +268,13 @@ function downloadCard() {
 
   // --- FRAGRANCE NAME (script) ---
   ctx.fillStyle = textScript;
-  ctx.font = '400 58px "Great Vibes", cursive';
+  ctx.font = '400 58px "Maison", cursive';
   ctx.fillText(f.fragranceName || '—', W / 2, y);
   y += 34;
 
   // Concentration
   ctx.fillStyle = textMuted;
-  ctx.font = '300 13px "Outfit", Helvetica, sans-serif';
+  ctx.font = '300 13px "Jost", sans-serif';
   // Manual letter spacing for small caps
   const concText = (f.concentration || 'Eau de Parfum').toUpperCase();
   drawSpacedText(ctx, concText, W / 2, y, 4);
@@ -301,7 +301,7 @@ function downloadCard() {
 
     // Label
     ctx.fillStyle = textLabel;
-    ctx.font = '300 11px "Outfit", Helvetica, sans-serif';
+  ctx.font = '300 13px "Jost", sans-serif';
     drawSpacedText(ctx, label.toUpperCase(), px, y, 3, 'left');
     y += 30;
 
@@ -341,7 +341,7 @@ function downloadCard() {
     const cy = y + Math.floor(i / 2) * 68;
 
     ctx.fillStyle = textLabel;
-    ctx.font = '300 11px "Outfit", Helvetica, sans-serif';
+  ctx.font = '300 13px "Jost", sans-serif';
     drawSpacedText(ctx, item.label, cx, cy, 3, 'left');
 
     ctx.fillStyle = textDark;
@@ -362,14 +362,14 @@ function downloadCard() {
 
   // --- BATCH ROW ---
   ctx.fillStyle = textMuted;
-  ctx.font = '400 14px "Outfit", Helvetica, sans-serif';
+  ctx.font = '300 13px "Jost", sans-serif';
   ctx.textAlign = 'left';
   ctx.fillText((f.batch?.batchCode || '—'), px, y);
   ctx.fillText('Édition ' + (f.batch?.editionSize || '—'), px, y + 22);
 
   // Paris · 2026 on the right
   ctx.textAlign = 'right';
-  ctx.font = '300 13px "Outfit", Helvetica, sans-serif';
+  ctx.font = '300 13px "Jost", sans-serif';
   drawSpacedText(ctx, 'PARIS · 2026', W - px - 40, y + 5, 2, 'right');
 
   // --- CIRCULAR SEAL ---
@@ -392,7 +392,7 @@ function downloadCard() {
 
   // Seal text - "MAISON" on top curve
   ctx.fillStyle = sealColor;
-  ctx.font = '300 8px "Outfit", Helvetica, sans-serif';
+  ctx.font = '300 13px "Jost", sans-serif';
   ctx.textAlign = 'center';
   drawTextOnArc(ctx, 'MAISON', sealX, sealY, sealR - 12, -Math.PI * 0.75, -Math.PI * 0.25);
 
