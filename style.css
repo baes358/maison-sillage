@@ -3,8 +3,8 @@
     src: url('./fonts/CS-MaisonSezanne-Regular.ttf') format('truetype');
 }
 @font-face {
-    font-family: 'Nanum';
-    src: url('./fonts/NanumMyeongjo-Regular.ttf') format('truetype');
+    font-family: 'Calder';
+    src: url('./fonts/Calder-LC.otf') format('opentype');
 }
 @font-face {
     font-family: 'Nanum-bold';
@@ -17,7 +17,7 @@
 }
 
 html{
-    font-family:'Nanum';
+    font-family:'Calder';
     background:var(--blue);
     
 }
