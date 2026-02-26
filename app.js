@@ -197,25 +197,267 @@ function renderReveal(f) {
 // ══════════════════════════════════════════ ARCHIVE / DOWNLOAD
 function downloadCard() {
   if (!currentFragrance) return;
-  
-  // Save to localStorage cellar
+
+  // Save to cellar
   try {
     const cellar = JSON.parse(localStorage.getItem('maisonsb-cellar') || '[]');
     cellar.push({ ...currentFragrance, savedAt: Date.now() });
     localStorage.setItem('maisonsb-cellar', JSON.stringify(cellar));
     updateCellarCount();
   } catch(e) {}
-  
-  // Download JSON
-  const blob = new Blob([JSON.stringify(currentFragrance, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  const slug = (currentFragrance.fragranceName || 'fragrance').toLowerCase().replace(/\s+/g, '-');
-  a.href = url;
-  a.download = `maison-sb_${slug}_2026.json`;
-  a.click();
-  URL.revokeObjectURL(url);
+
+  const f = currentFragrance;
+  const W = 800, H = 1130;
+  const canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  // --- COLORS ---
+  const bgCream    = '#f5f0ea';
+  const bgTop      = '#f0e8e0';
+  const textDark   = '#3d2c2c';
+  const textScript  = '#5c3a3a';
+  const textMuted  = '#9a8a7a';
+  const textLabel  = '#8a7a6a';
+  const lineColor  = '#d4c4b0';
+  const sealColor  = '#c0b0a0';
+
+  // --- BACKGROUND ---
+  // Subtle gradient from slightly pink top to warm cream
+  const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
+  bgGrad.addColorStop(0, '#f2ebe3');
+  bgGrad.addColorStop(0.04, '#f5f0ea');
+  bgGrad.addColorStop(1, '#f5f0ea');
+  ctx.fillStyle = bgGrad;
+  ctx.fillRect(0, 0, W, H);
+
+  // Top accent bar (subtle mauve/pink)
+  const topBar = ctx.createLinearGradient(0, 0, W, 0);
+  topBar.addColorStop(0, '#e8d8cc');
+  topBar.addColorStop(0.3, '#d4a8a0');
+  topBar.addColorStop(0.5, '#c89090');
+  topBar.addColorStop(0.7, '#d4a8a0');
+  topBar.addColorStop(1, '#e8d8cc');
+  ctx.fillStyle = topBar;
+  ctx.fillRect(0, 0, W, 5);
+
+  const px = 60;
+  let y = 80;
+
+  // --- HEADER: Maison SB ---
+  ctx.textAlign = 'center';
+  ctx.fillStyle = textScript;
+  ctx.font = '400 52px "Great Vibes", cursive';
+  ctx.fillText('Maison Sillage', W / 2, y);
+  y += 32;
+
+  // Subtitle
+  ctx.fillStyle = textMuted;
+  ctx.font = 'italic 300 16px "Cormorant Garamond", Georgia, serif';
+  ctx.fillText('Atelier de Parfum Digital', W / 2, y);
+  y += 50;
+
+  // --- DIVIDER LINE ---
+  ctx.strokeStyle = lineColor;
+  ctx.lineWidth = 0.5;
+  ctx.beginPath();
+  ctx.moveTo(px + 40, y);
+  ctx.lineTo(W - px - 40, y);
+  ctx.stroke();
+  y += 55;
+
+  // --- FRAGRANCE NAME (script) ---
+  ctx.fillStyle = textScript;
+  ctx.font = '400 58px "Great Vibes", cursive';
+  ctx.fillText(f.fragranceName || '—', W / 2, y);
+  y += 34;
+
+  // Concentration
+  ctx.fillStyle = textMuted;
+  ctx.font = '300 13px "Outfit", Helvetica, sans-serif';
+  // Manual letter spacing for small caps
+  const concText = (f.concentration || 'Eau de Parfum').toUpperCase();
+  drawSpacedText(ctx, concText, W / 2, y, 4);
+  y += 28;
+
+  // Family
+  ctx.fillStyle = textDark;
+  ctx.font = 'italic 400 20px "Cormorant Garamond", Georgia, serif';
+  ctx.fillText(f.family || '—', W / 2, y);
+  y += 55;
+
+  ctx.textAlign = 'left';
+
+  // --- NOTES SECTIONS ---
+  function drawNotesSection(label, notes) {
+    // Divider above
+    ctx.strokeStyle = lineColor;
+    ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.moveTo(px, y);
+    ctx.lineTo(W - px, y);
+    ctx.stroke();
+    y += 28;
+
+    // Label
+    ctx.fillStyle = textLabel;
+    ctx.font = '300 11px "Outfit", Helvetica, sans-serif';
+    drawSpacedText(ctx, label.toUpperCase(), px, y, 3, 'left');
+    y += 30;
+
+    // Notes
+    ctx.fillStyle = textDark;
+    ctx.font = '400 26px "Cormorant Garamond", Georgia, serif';
+    const joined = (notes && notes.length) ? notes.join('   ·   ') : '—';
+    ctx.fillText(joined, px, y);
+    y += 40;
+  }
+
+  drawNotesSection('Notes de tête', f.olfactoryPyramid?.top);
+  drawNotesSection('Notes de cœur', f.olfactoryPyramid?.heart);
+  drawNotesSection('Notes de fond', f.olfactoryPyramid?.base);
+
+  y += 15;
+
+  // --- DIVIDER ---
+  ctx.strokeStyle = lineColor;
+  ctx.lineWidth = 0.5;
+  ctx.beginPath();
+  ctx.moveTo(px, y);
+  ctx.lineTo(W - px, y);
+  ctx.stroke();
+  y += 35;
+
+  // --- CHARACTER GRID (2x2) ---
+  const gridItems = [
+    { label: 'HUMEUR', value: f.character?.mood || '—' },
+    { label: 'LONGÉVITÉ', value: (f.character?.longevityHours || 0).toFixed(1) + ' h' },
+    { label: 'PROJECTION', value: projectionLabel(f.character?.projection || 0.5) },
+    { label: 'INTENSITÉ', value: Math.round((f.character?.intensity || 0.5) * 100) + '%' }
+  ];
+  const colW = (W - px * 2) / 2;
+  gridItems.forEach((item, i) => {
+    const cx = px + (i % 2) * colW;
+    const cy = y + Math.floor(i / 2) * 68;
+
+    ctx.fillStyle = textLabel;
+    ctx.font = '300 11px "Outfit", Helvetica, sans-serif';
+    drawSpacedText(ctx, item.label, cx, cy, 3, 'left');
+
+    ctx.fillStyle = textDark;
+    ctx.font = '400 26px "Cormorant Garamond", Georgia, serif';
+    ctx.fillText(item.value, cx, cy + 28);
+  });
+
+  y += 155;
+
+  // --- BOTTOM DIVIDER ---
+  ctx.strokeStyle = lineColor;
+  ctx.lineWidth = 0.5;
+  ctx.beginPath();
+  ctx.moveTo(px, y);
+  ctx.lineTo(W - px, y);
+  ctx.stroke();
+  y += 35;
+
+  // --- BATCH ROW ---
+  ctx.fillStyle = textMuted;
+  ctx.font = '400 14px "Outfit", Helvetica, sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText((f.batch?.batchCode || '—'), px, y);
+  ctx.fillText('Édition ' + (f.batch?.editionSize || '—'), px, y + 22);
+
+  // Paris · 2026 on the right
+  ctx.textAlign = 'right';
+  ctx.font = '300 13px "Outfit", Helvetica, sans-serif';
+  drawSpacedText(ctx, 'PARIS · 2026', W - px - 40, y + 5, 2, 'right');
+
+  // --- CIRCULAR SEAL ---
+  const sealX = W - px - 35;
+  const sealY = y + 15;
+  const sealR = 32;
+
+  // Outer ring
+  ctx.strokeStyle = sealColor;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.arc(sealX, sealY, sealR, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Inner ring
+  ctx.lineWidth = 0.5;
+  ctx.beginPath();
+  ctx.arc(sealX, sealY, sealR - 5, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Seal text - "MAISON" on top curve
+  ctx.fillStyle = sealColor;
+  ctx.font = '300 8px "Outfit", Helvetica, sans-serif';
+  ctx.textAlign = 'center';
+  drawTextOnArc(ctx, 'MAISON', sealX, sealY, sealR - 12, -Math.PI * 0.75, -Math.PI * 0.25);
+
+  // "SB" in center
+  ctx.font = '400 16px "Cormorant Garamond", Georgia, serif';
+  ctx.fillText('Sillage', sealX, sealY + 5);
+
+  ctx.textAlign = 'left';
+
+  // --- DOWNLOAD ---
+  const slug = (f.fragranceName || 'fragrance').toLowerCase().replace(/\s+/g, '-');
+  canvas.toBlob(blob => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `maison-sillage_${slug}.jpg`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 'image/jpeg', 0.95);
 }
+
+// Helper: draw text with manual letter spacing
+function drawSpacedText(ctx, text, x, y, spacing, align) {
+  if (align === 'right') {
+    let totalW = 0;
+    for (let i = 0; i < text.length; i++) {
+      totalW += ctx.measureText(text[i]).width + (i < text.length - 1 ? spacing : 0);
+    }
+    x -= totalW;
+  } else if (align === 'center' || ctx.textAlign === 'center') {
+    let totalW = 0;
+    for (let i = 0; i < text.length; i++) {
+      totalW += ctx.measureText(text[i]).width + (i < text.length - 1 ? spacing : 0);
+    }
+    x -= totalW / 2;
+  }
+  const prevAlign = ctx.textAlign;
+  ctx.textAlign = 'left';
+  for (let i = 0; i < text.length; i++) {
+    ctx.fillText(text[i], x, y);
+    x += ctx.measureText(text[i]).width + spacing;
+  }
+  ctx.textAlign = prevAlign;
+}
+
+// Helper: draw text along an arc
+function drawTextOnArc(ctx, text, cx, cy, radius, startAngle, endAngle) {
+  const totalAngle = endAngle - startAngle;
+  const angleStep = totalAngle / (text.length - 1 || 1);
+  ctx.save();
+  for (let i = 0; i < text.length; i++) {
+    const angle = startAngle + i * angleStep;
+    const tx = cx + radius * Math.cos(angle);
+    const ty = cy + radius * Math.sin(angle);
+    ctx.save();
+    ctx.translate(tx, ty);
+    ctx.rotate(angle + Math.PI / 2);
+    ctx.fillText(text[i], 0, 0);
+    ctx.restore();
+  }
+  ctx.restore();
+}
+
 
 function updateCellarCount() {
   try {
