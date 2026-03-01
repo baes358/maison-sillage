@@ -59,8 +59,11 @@ document.getElementById('fragrance-name-input').addEventListener('input', e => s
 async function startGeneration() {
   goTo('generating');
   animateGenerating();
-  const fragrance = await callClaude();
-  await new Promise(r => setTimeout(r, 3200));
+  // Run API call and minimum display time in parallel so we don't double-wait
+  const [fragrance] = await Promise.all([
+    callClaude(),
+    new Promise(r => setTimeout(r, 2500))
+  ]);
   renderReveal(fragrance);
   goTo('reveal');
 }
@@ -143,9 +146,12 @@ Rules: intensity 0-1, longevityHours 2-12, projection 0-1, primaryHue 0-360, min
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-5-20251001',
         max_tokens: 1000,
         messages: [{ role: 'user', content: prompt }]
       })
@@ -193,11 +199,12 @@ function renderReveal(f) {
 
   document.documentElement.style.setProperty('--accent-hue', hue);
 
-  document.getElementById('liquidTop').setAttribute('stop-color', `hsl(${hue},40%,72%)`);
-  document.getElementById('liquidBot').setAttribute('stop-color', `hsl(${hue},46%,46%)`);
-  document.getElementById('gen-liquid').setAttribute('fill', `hsl(${hue},40%,70%)`);
-  document.getElementById('genLiqTop').setAttribute('stop-color', `hsl(${hue},40%,72%)`);
-  document.getElementById('genLiqBot').setAttribute('stop-color', `hsl(${hue},46%,46%)`);
+  const elLiquidTop = document.getElementById('liquidTop');
+  const elLiquidBot = document.getElementById('liquidBot');
+  const elGenLiquid = document.getElementById('gen-liquid');
+  if (elLiquidTop) elLiquidTop.setAttribute('stop-color', `hsl(${hue},40%,72%)`);
+  if (elLiquidBot) elLiquidBot.setAttribute('stop-color', `hsl(${hue},46%,46%)`);
+  if (elGenLiquid) elGenLiquid.setAttribute('fill', `hsl(${hue},40%,70%)`);
 
   document.getElementById('card-name').textContent = f.fragranceName || '—';
   document.getElementById('card-concentration').textContent = f.concentration || 'Eau de Parfum';
@@ -222,9 +229,9 @@ async function downloadCard() {
 
   // Save to cellar
   try {
-    const cellar = JSON.parse(localStorage.getItem('maisonsb-cellar') || '[]');
+    const cellar = JSON.parse(localStorage.getItem('maisonsillage-cellar') || '[]');
     cellar.push({ ...currentFragrance, savedAt: Date.now() });
-    localStorage.setItem('maisonsb-cellar', JSON.stringify(cellar));
+    localStorage.setItem('maisonsillage-cellar', JSON.stringify(cellar));
     updateCellarCount();
   } catch(e) {}
 
@@ -285,11 +292,11 @@ async function downloadCard() {
   const px = 60;
   let y = 80;
 
-  // --- HEADER: Maison SB ---
+  // --- HEADER: Maison sillage ---
   ctx.textAlign = 'center';
   ctx.fillStyle = textScript;
   ctx.font = '400 52px "Maison", cursive';
-  ctx.fillText('Maison SB', W / 2, y);
+  ctx.fillText('Maison Sillage', W / 2, y);
   y += 32;
 
   // Subtitle
@@ -437,9 +444,9 @@ async function downloadCard() {
   ctx.textAlign = 'center';
   drawTextOnArc(ctx, 'MAISON', sealX, sealY, sealR - 12, -Math.PI * 0.75, -Math.PI * 0.25);
 
-  // "SB" in center
+  // "sillage" in center
   ctx.font = '400 16px "Jost", sans-serif';
-  ctx.fillText('SB', sealX, sealY + 5);
+  ctx.fillText('Sillage', sealX, sealY + 5);
 
   ctx.textAlign = 'left';
 
@@ -449,7 +456,7 @@ async function downloadCard() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `maison-sb_${slug}_2026.jpg`;
+    a.download = `maison-sillage_${slug}_2026.jpg`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -501,7 +508,7 @@ function drawTextOnArc(ctx, text, cx, cy, radius, startAngle, endAngle) {
 
 function updateCellarCount() {
   try {
-    const cellar = JSON.parse(localStorage.getItem('maisonsb-cellar') || '[]');
+    const cellar = JSON.parse(localStorage.getItem('maisonsillage-cellar') || '[]');
     const el = document.getElementById('cellar-count');
     if (cellar.length > 0) {
       el.textContent = `${cellar.length} flacon${cellar.length > 1 ? 's' : ''} en cave`;
