@@ -1,3 +1,16 @@
+function createMist() {
+  const container = document.getElementById('mist-container');
+  for (let i = 0; i < 18; i++) {
+    const p = document.createElement('div');
+    p.className = 'mist-particle';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.animationDuration = (8 + Math.random() * 12) + 's';
+    p.style.animationDelay = (Math.random() * 10) + 's';
+    p.style.width = p.style.height = (2 + Math.random() * 3) + 'px';
+    container.appendChild(p);
+  }
+};
+
 // ══════════════════════════════════════════ STATE
 const state = {
   mood: 50,
@@ -9,7 +22,24 @@ const state = {
 // ══════════════════════════════════════════ NAVIGATION
 function goTo(screenId) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById('screen-' + screenId).classList.add('active');
+  const target = document.getElementById('screen-' + screenId);
+  target.classList.add('active');
+
+  // Re-trigger card row animations on reveal
+  if (screenId === 'reveal') {
+    target.querySelectorAll('.card-row').forEach(r => {
+      r.style.animation = 'none';
+      r.offsetHeight; // reflow
+      r.style.animation = '';
+    });
+    // Re-trigger bottle reveal
+    const bw = target.querySelector('.reveal-bottle-wrap');
+    if (bw) { bw.style.animation = 'none'; bw.offsetHeight; bw.style.animation = ''; }
+    const fc = target.querySelector('.fragrance-card');
+    if (fc) { fc.style.animation = 'none'; fc.offsetHeight; fc.style.animation = ''; }
+    const ar = target.querySelector('.actions-row');
+    if (ar) { ar.style.animation = 'none'; ar.offsetHeight; ar.style.animation = ''; }
+  }
 }
 
 // ══════════════════════════════════════════ OPTION BUTTONS
@@ -29,9 +59,7 @@ document.getElementById('fragrance-name-input').addEventListener('input', e => s
 async function startGeneration() {
   goTo('generating');
   animateGenerating();
-  
   const fragrance = await callClaude();
-  
   await new Promise(r => setTimeout(r, 3200));
   renderReveal(fragrance);
   goTo('reveal');
@@ -49,11 +77,10 @@ function animateGenerating() {
   let i = 0;
   const el = document.getElementById('gen-text');
   const liquid = document.getElementById('gen-liquid');
-  
-  // Fill bottle — body bottom at y=216, height=154
+
   liquid.setAttribute('y', '216');
   liquid.setAttribute('height', '0');
-  
+
   const intervalId = setInterval(() => {
     if (!document.getElementById('screen-generating').classList.contains('active')) {
       clearInterval(intervalId);
@@ -66,12 +93,10 @@ function animateGenerating() {
       el.style.transition = 'opacity 0.5s';
     }, 300);
     i++;
-    
-    // Fill liquid — bottle body: y=62 to y=216, height=154
+
     const fillH = Math.min((i / genMessages.length) * 144, 144);
     liquid.setAttribute('y', String(216 - fillH));
     liquid.setAttribute('height', String(fillH));
-    // Sync shine stripe
     const shine = document.getElementById('gen-liquid-shine');
     if (shine) { shine.setAttribute('y', String(216 - fillH)); shine.setAttribute('height', String(fillH)); }
   }, 900);
@@ -80,7 +105,6 @@ function animateGenerating() {
 // ══════════════════════════════════════════ CLAUDE API
 async function callClaude() {
   const moodWord = state.mood < 33 ? 'tender and soft' : state.mood > 66 ? 'bold and daring' : 'balanced and composed';
-  
   const prompt = `You are a master perfumer. Create a unique perfume based on these inputs:
 - Mood: ${moodWord} (${state.mood}/100)
 - Time: ${state.time}
@@ -131,7 +155,6 @@ Rules: intensity 0-1, longevityHours 2-12, projection 0-1, primaryHue 0-360, min
     const clean = text.replace(/```json|```/g, '').trim();
     return JSON.parse(clean);
   } catch(e) {
-    // Fallback
     return {
       schemaVersion: 'MF-1.0',
       fragranceName: state.customName || 'Lumière Voilée',
@@ -167,16 +190,15 @@ let currentFragrance = null;
 function renderReveal(f) {
   currentFragrance = f;
   const hue = f.visualIdentity?.primaryHue ?? 214;
-  
-  // Update CSS accent
+
   document.documentElement.style.setProperty('--accent-hue', hue);
-  
-  // Update bottle liquid color
+
   document.getElementById('liquidTop').setAttribute('stop-color', `hsl(${hue},40%,72%)`);
   document.getElementById('liquidBot').setAttribute('stop-color', `hsl(${hue},46%,46%)`);
   document.getElementById('gen-liquid').setAttribute('fill', `hsl(${hue},40%,70%)`);
-  
-  // Card content
+  document.getElementById('genLiqTop').setAttribute('stop-color', `hsl(${hue},40%,72%)`);
+  document.getElementById('genLiqBot').setAttribute('stop-color', `hsl(${hue},46%,46%)`);
+
   document.getElementById('card-name').textContent = f.fragranceName || '—';
   document.getElementById('card-concentration').textContent = f.concentration || 'Eau de Parfum';
   document.getElementById('card-family').textContent = f.family || '—';
@@ -190,12 +212,12 @@ function renderReveal(f) {
   document.getElementById('card-batch').textContent = f.batch?.batchCode || '—';
   document.getElementById('card-edition').textContent = `Édition ${f.batch?.editionSize || '—'}`;
   document.getElementById('bottle-name-label').textContent = (f.concentration || 'Eau de Parfum').toUpperCase();
-  
+
   updateCellarCount();
 }
 
-// ══════════════════════════════════════════ ARCHIVE / DOWNLOAD
-function downloadCard() {
+// ══════════════════════════════════════════ ARCHIVE
+async function downloadCard() {
   if (!currentFragrance) return;
 
   // Save to cellar
@@ -205,6 +227,25 @@ function downloadCard() {
     localStorage.setItem('maisonsb-cellar', JSON.stringify(cellar));
     updateCellarCount();
   } catch(e) {}
+
+  // Ensure custom fonts are loaded before drawing
+  // Use FontFace API to explicitly load fonts into canvas context
+  try {
+    // Load Maison font explicitly via FontFace so canvas can use it
+    const maisonFont = new FontFace('Maison', 'url(./fonts/CS-MaisonSezanne-Regular.ttf)');
+    const maisonLoaded = await maisonFont.load();
+    document.fonts.add(maisonLoaded);
+
+    // Load Jost font explicitly
+    const jostFont = new FontFace('Jost', 'url(./fonts/Jost-VariableFont_wght.ttf)');
+    const jostLoaded = await jostFont.load();
+    document.fonts.add(jostLoaded);
+
+    await document.fonts.ready;
+  } catch(e) {
+    // Fallback: wait a bit for fonts to be available
+    await new Promise(r => setTimeout(r, 500));
+  }
 
   const f = currentFragrance;
   const W = 800, H = 1130;
@@ -248,12 +289,12 @@ function downloadCard() {
   ctx.textAlign = 'center';
   ctx.fillStyle = textScript;
   ctx.font = '400 52px "Maison", cursive';
-  ctx.fillText('Maison Sillage', W / 2, y);
+  ctx.fillText('Maison SB', W / 2, y);
   y += 32;
 
   // Subtitle
   ctx.fillStyle = textMuted;
-  ctx.font = 'italic 300 16px "Cormorant Garamond", Georgia, serif';
+  ctx.font = 'italic 300 16px "Jost", sans-serif';
   ctx.fillText('Atelier de Parfum Digital', W / 2, y);
   y += 50;
 
@@ -282,7 +323,7 @@ function downloadCard() {
 
   // Family
   ctx.fillStyle = textDark;
-  ctx.font = 'italic 400 20px "Cormorant Garamond", Georgia, serif';
+  ctx.font = 'italic 400 20px "Jost", sans-serif';
   ctx.fillText(f.family || '—', W / 2, y);
   y += 55;
 
@@ -301,13 +342,13 @@ function downloadCard() {
 
     // Label
     ctx.fillStyle = textLabel;
-  ctx.font = '300 13px "Jost", sans-serif';
+    ctx.font = '300 11px "Jost", sans-serif';
     drawSpacedText(ctx, label.toUpperCase(), px, y, 3, 'left');
     y += 30;
 
     // Notes
     ctx.fillStyle = textDark;
-    ctx.font = '400 26px "Cormorant Garamond", Georgia, serif';
+    ctx.font = '400 26px "Jost", sans-serif';
     const joined = (notes && notes.length) ? notes.join('   ·   ') : '—';
     ctx.fillText(joined, px, y);
     y += 40;
@@ -341,11 +382,11 @@ function downloadCard() {
     const cy = y + Math.floor(i / 2) * 68;
 
     ctx.fillStyle = textLabel;
-  ctx.font = '300 13px "Jost", sans-serif';
+    ctx.font = '300 11px "Jost", sans-serif';
     drawSpacedText(ctx, item.label, cx, cy, 3, 'left');
 
     ctx.fillStyle = textDark;
-    ctx.font = '400 26px "Cormorant Garamond", Georgia, serif';
+    ctx.font = '400 26px "Jost", sans-serif';
     ctx.fillText(item.value, cx, cy + 28);
   });
 
@@ -362,7 +403,7 @@ function downloadCard() {
 
   // --- BATCH ROW ---
   ctx.fillStyle = textMuted;
-  ctx.font = '300 13px "Jost", sans-serif';
+  ctx.font = '400 14px "Jost", sans-serif';
   ctx.textAlign = 'left';
   ctx.fillText((f.batch?.batchCode || '—'), px, y);
   ctx.fillText('Édition ' + (f.batch?.editionSize || '—'), px, y + 22);
@@ -392,13 +433,13 @@ function downloadCard() {
 
   // Seal text - "MAISON" on top curve
   ctx.fillStyle = sealColor;
-  ctx.font = '300 13px "Jost", sans-serif';
+  ctx.font = '300 8px "Jost", sans-serif';
   ctx.textAlign = 'center';
   drawTextOnArc(ctx, 'MAISON', sealX, sealY, sealR - 12, -Math.PI * 0.75, -Math.PI * 0.25);
 
   // "SB" in center
-  ctx.font = '400 16px "Cormorant Garamond", Georgia, serif';
-  ctx.fillText('Sillage', sealX, sealY + 5);
+  ctx.font = '400 16px "Jost", sans-serif';
+  ctx.fillText('SB', sealX, sealY + 5);
 
   ctx.textAlign = 'left';
 
@@ -408,7 +449,7 @@ function downloadCard() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `maison-sillage_${slug}.jpg`;
+    a.download = `maison-sb_${slug}_2026.jpg`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -458,7 +499,6 @@ function drawTextOnArc(ctx, text, cx, cy, radius, startAngle, endAngle) {
   ctx.restore();
 }
 
-
 function updateCellarCount() {
   try {
     const cellar = JSON.parse(localStorage.getItem('maisonsb-cellar') || '[]');
@@ -470,3 +510,9 @@ function updateCellarCount() {
 }
 
 updateCellarCount();
+
+// Preload custom fonts for canvas rendering
+try {
+  document.fonts.load('400 52px "Maison"');
+  document.fonts.load('400 26px "Jost"');
+} catch(e) {}
